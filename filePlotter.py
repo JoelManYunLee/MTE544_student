@@ -63,4 +63,4 @@ if __name__=="__main__":
 
     filenames=args.files
     for filename in filenames:
-        plot_errors(filename)
+        plot_lidar_scan(filename)
