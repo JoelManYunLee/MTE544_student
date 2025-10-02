@@ -11,8 +11,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPo
     # For the sensors: Imu, LaserScan, and Odometry
 # Check the online documentation to fill in the lines below
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Imu
-from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import Imu, LaserScan
 from nav_msgs.msg import Odometry
 
 from rclpy.time import Time

@@ -31,9 +31,6 @@ class ImageVisualizationNode(Node):
         cv2.waitKey(1)
 
 
-
-
-
 def main(args=None):
     rclpy.init(args=args)
     image_visualization_node = ImageVisualizationNode()
