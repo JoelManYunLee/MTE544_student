@@ -5,31 +5,34 @@ import ast
 import math
 
 import matplotlib.pyplot as plt
-from utilities import FileReader
+from utilities import FileReader, euler_from_quaternion
 
 def plot_lidar_scan(filename, row=0):
     headers, values=FileReader(filename).read_file()
     row_vals = values[row]
 
-    ranges_str = row_vals[headers.index("ranges")]
-    ranges_lst = ast.literal_eval(ranges_str)
+    acc_x = float(row_vals[headers.index("acc_x")])
+    acc_y = float(row_vals[headers.index("acc_y")])
+    time = float(row_vals[headers.index("stamp")])
 
-    angle_increment = float(row_vals[headers.index("angle_increment")])
+    angle_increment = float(row_vals[headers.index("angular_z")])
     
     # get cartesian points x, y from angle theta and radial distance (ranges)
-    x, y = [], []
-    for i, r in enumerate(ranges_lst):
-        if math.isinf(r) or math.isnan(r):
-            continue
-        theta = 0 + i * angle_increment # 0 because we don't need the plot relative to any frame??
-        x.append(r * math.cos(theta))
-        y.append(r * math.sin(theta))
+    yaw_list = []
+    # for i, x in enumerate(acc_x):
+    #     if math.isinf(x) or math.isnan(x):
+    #         continue
+    #     q = [x, acc_y[i], 0, angle_increment[i]]
+    #     roll, pitch, yaw = euler_from_quaternion(q)
+    #     yaw_list.append(yaw)
 
-    plt.scatter(x, y)
+
+
+    plt.scatter(acc_x, time)
     plt.axis("equal")
     plt.xlabel("x")
-    plt.ylabel("y")
-    plt.title(f"Lidar scan in cartesian points (row {row})")
+    plt.ylabel("time")
+    plt.title(f"X IMU data")
     plt.grid()
     plt.show()
 
@@ -63,4 +66,4 @@ if __name__=="__main__":
 
     filenames=args.files
     for filename in filenames:
-        plot_lidar_scan(filename)
+        plot_errors(filename)

@@ -50,7 +50,7 @@ class motion_executioner(Node):
         self.laser_logger=Logger('laser_content_'+str(motion_types[motion_type])+'.csv', headers=["ranges", "angle_increment", "stamp"])
         
         # TODO Part 3: Create the QoS profile by setting the proper parameters in (...)
-        qos = QoSProfile(reliability=ReliabilityPolicy.RELIABLE,
+        qos = QoSProfile(reliability=ReliabilityPolicy.BEST_EFFORT,
                          durability=DurabilityPolicy.VOLATILE,
                          history=HistoryPolicy.KEEP_LAST,
                          depth=10
@@ -76,21 +76,19 @@ class motion_executioner(Node):
     # You can save the needed fields into a list, and pass the list to the log_values function in utilities.py
 
     def imu_callback(self, imu_msg: Imu):
+        self.imu_initialized = True
         msg_time = Time.from_msg(imu_msg.header.stamp).nanoseconds
 
         orientation = imu_msg.orientation
         angular_vel = imu_msg.angular_velocity
         linear_accel = imu_msg.linear_acceleration
 
-        values = [msg_time,
-                  orientation.x, orientation.y, orientation.z, orientation.w,
-                  angular_vel.x, angular_vel.y, angular_vel.z,
-                  linear_accel.x, linear_accel.y, linear_accel.z
-                 ] 
+        values = [linear_accel.x, linear_accel.y, angular_vel.z, msg_time] 
 
         self.imu_logger.log_values(values)
         
     def odom_callback(self, odom_msg: Odometry):
+        self.odom_initialized = True 
         msg_time = Time.from_msg(odom_msg.header.stamp).nanoseconds
 
         pose = odom_msg.pose.pose
@@ -101,31 +99,29 @@ class motion_executioner(Node):
         linear = twist.linear
         angular = twist.angular
 
-        values = [msg_time,
-                  position.x, position.y, position.z,
-                  orientation.x, orientation.y, orientation.z, orientation.w,
-                  linear.x, linear.y, linear.z,
-                  angular.x, angular.y, angular.z
-                 ]
-        
+        values = [position.x, position.y, euler_from_quaternion(orientation.x, orientation.y, orientation.z, angular.z)[2], msg_time]
+
         self.odom_logger.log_values(values)
                 
     def laser_callback(self, laser_msg: LaserScan):
+        self.laser_initialized = True
         msg_time = Time.from_msg(laser_msg.header.stamp).nanoseconds
 
         ranges = list(laser_msg.ranges)
-        intensities = list(laser_msg.intensities)
 
-        values = [msg_time] + ranges + intensities
+        values = [str(ranges), laser_msg.angle_increment, msg_time]
 
         self.laser_logger.log_values(values)
                         
     def timer_callback(self):
+        print(self.odom_initialized, self.laser_initialized, self.imu_initialized)
         
         if self.odom_initialized and self.laser_initialized and self.imu_initialized:
+            print("Robot initialized well.")
             self.successful_init=True
             
         if not self.successful_init:
+            print("Robot not init.")
             return
         
         cmd_vel_msg=Twist()
@@ -150,8 +146,8 @@ class motion_executioner(Node):
 
     def make_circular_twist(self):
         msg = Twist()
-        msg.linear.x = 0.2  # m/s forward
-        msg.angular.z = 0.5  # rad/s rotation
+        msg.linear.x = 0.1 # m/s forward
+        msg.angular.z = 3.0 # rad/s rotation
         return msg
 
     def make_spiral_twist(self):
@@ -159,7 +155,7 @@ class motion_executioner(Node):
 
         # Increase linear speed over time (e.g., linearly with step)
         msg.linear.x = 0.1 + 0.01 * self.spiral_step
-        msg.angular.z = 0.5
+        msg.angular.z = 5.0
 
         self.spiral_step += 1
         return msg
