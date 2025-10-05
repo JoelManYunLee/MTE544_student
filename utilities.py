@@ -1,4 +1,5 @@
 from math import atan2, asin, sqrt
+import csv
 
 M_PI=3.1415926535
 
@@ -30,6 +31,24 @@ class Logger:
 
     def save_log(self):
         pass
+
+class LidarLogger:
+    def __init__(self, filename, headers=["e", "e_dot", "e_int", "stamp"]):
+        self.filename = filename
+        
+        with open(self.filename, 'a', newline='') as f:
+            header_str = ""
+            for header in headers:
+                header_str+=header
+                header_str+= ", "
+        header_str+="\n"
+        
+        f.write(header_str)
+    
+    def log_values(self, values_list):
+        with open(self.filename, 'a', newline='') as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(values_list)
 
 class FileReader:
     def __init__(self, filename):
@@ -74,6 +93,25 @@ class FileReader:
                 table.append(row)
         
         return headers, table
+    
+    def read_lidar_file(self):
+        with open(self.filename, "r") as f:
+            lines = f.readlines()
+
+        headers = [h.strip() for h in lines[0].split(',') if h.strip() != ""]
+        data_line = lines[1].strip()  # first scan
+        parts = data_line.split(',')
+
+        # angle_increment is second-to-last numeric field (before timestamp)
+        angle_increment = float(parts[-2])
+        stamp = float(parts[-1])
+
+        # everything before that belongs to the ranges list
+        ranges_str = ",".join(parts[:-2])
+        if not ranges_str.endswith("]"):
+            ranges_str += "]"
+
+        return headers, [ranges_str, angle_increment, stamp]
 
 
 # TODO Part 5: Implement the conversion from Quaternion to Euler Angles

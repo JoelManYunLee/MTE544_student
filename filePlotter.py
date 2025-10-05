@@ -8,35 +8,38 @@ import matplotlib.pyplot as plt
 from utilities import FileReader, euler_from_quaternion
 
 def plot_lidar_scan(filename, row=0):
-    headers, values=FileReader(filename).read_file()
-    row_vals = values[row]
+    headers, values = FileReader(filename).read_lidar_file()
 
-    acc_x = float(row_vals[headers.index("acc_x")])
-    acc_y = float(row_vals[headers.index("acc_y")])
-    time = float(row_vals[headers.index("stamp")])
+    # --- Extract data from the first scan ---
+    row = values[0]  # plot only 1 message
+    angle_increment = float(values[headers.index("angle_increment")])
 
-    angle_increment = float(row_vals[headers.index("angular_z")])
-    
-    # get cartesian points x, y from angle theta and radial distance (ranges)
-    yaw_list = []
-    # for i, x in enumerate(acc_x):
-    #     if math.isinf(x) or math.isnan(x):
-    #         continue
-    #     q = [x, acc_y[i], 0, angle_increment[i]]
-    #     roll, pitch, yaw = euler_from_quaternion(q)
-    #     yaw_list.append(yaw)
+    # --- Convert 'ranges' string into a real list of floats ---
+    ranges_clean = row.replace('inf', 'float("inf")').replace('nan', 'float("nan")')
 
+    ranges = eval(ranges_clean)
+    # --- Convert to Cartesian coordinates ---
+    angle_min = 0.0  # assume first beam at +x direction
+    xs, ys = [], []
 
+    for i, r in enumerate(ranges):
+        if math.isinf(r) or math.isnan(r):
+            continue  # skip invalid readings
+        theta = angle_min + i * angle_increment
+        xs.append(r * math.cos(theta))
+        ys.append(r * math.sin(theta))
 
-    plt.scatter(acc_x, time)
+    # --- Plot ---
+    plt.figure()
+    plt.scatter(xs, ys, s=5)
     plt.axis("equal")
-    plt.xlabel("x")
-    plt.ylabel("time")
-    plt.title(f"X IMU data")
-    plt.grid()
+    plt.grid(True)
+    plt.xlabel("x [m]")
+    plt.ylabel("y [m]")
+    plt.title("Spiral Lidar scan (first message)")
     plt.show()
 
-def plot_errors(filename):
+def plot_imu_odom(filename):
     headers, values=FileReader(filename).read_file() 
     time_list=[]
     first_stamp=values[0][-1]
@@ -49,8 +52,33 @@ def plot_errors(filename):
     
     #plt.plot([lin[0] for lin in values], [lin[1] for lin in values])
 
+    plt.xlabel("Time (s)")
+    plt.ylabel("Odometry data (position [m], orientation [rad])")
+    plt.title("Robot odometry data over time: Line")
     plt.legend()
     plt.grid()
+    plt.show()
+
+def plot_imu_odom_subplots(filename):
+    headers, values = FileReader(filename).read_file() 
+    time_list = []
+    first_stamp = values[0][-1]
+    
+    for val in values:
+        time_list.append(val[-1] - first_stamp)
+
+    num_signals = len(headers) - 1  # exclude timestamp
+    fig, axes = plt.subplots(num_signals, 1, figsize=(8, 6), sharex=True)
+    fig.suptitle("IMU msg data vs Time: Line", fontsize=14, fontweight='bold')
+
+    for i in range(num_signals):
+        axes[i].plot(time_list, [row[i] for row in values], label=headers[i])
+        axes[i].set_ylabel(headers[i])
+        axes[i].legend(loc='upper right')
+        axes[i].grid(True)
+
+    axes[-1].set_xlabel("Time (s)")
+    plt.tight_layout(rect=[0, 0, 1, 0.96])  # leave space for main title
     plt.show()
     
 import argparse
@@ -66,4 +94,4 @@ if __name__=="__main__":
 
     filenames=args.files
     for filename in filenames:
-        plot_errors(filename)
+        plot_lidar_scan(filename)
