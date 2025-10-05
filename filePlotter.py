@@ -59,6 +59,44 @@ def plot_imu_odom(filename):
     plt.grid()
     plt.show()
 
+def plot_trajectory(filename):
+    headers, values = FileReader(filename).read_file() 
+    time_list = []
+    first_stamp = values[0][-1]
+    
+    for val in values:
+        time_list.append(val[-1] - first_stamp)
+
+    num_signals = len(headers) - 1  # exclude timestamp
+    fig, axes = plt.subplots(num_signals + 1, 1, figsize=(8, 10), sharex=False)
+    fig.suptitle("Spiral Odometry Data and Trajectory", fontsize=14, fontweight='bold')
+
+    # Plot x, y, and theta vs time
+    for i in range(num_signals):
+        axes[i].plot(time_list, [row[i] for row in values], label=headers[i])
+        axes[i].set_ylabel(headers[i])
+        axes[i].legend(loc='upper right')
+        axes[i].grid(True)
+
+    axes[num_signals - 1].set_xlabel("Time (s)")
+
+    # Plot x vs y trajectory (final subplot)
+    x_idx = headers.index('x [m]')
+    y_idx = headers.index('y [m]')
+
+    axes[-1].plot([row[x_idx] for row in values],
+                  [row[y_idx] for row in values],
+                  label="Trajectory", color='purple')
+    axes[-1].set_xlabel("x position (m)")
+    axes[-1].set_ylabel("y position (m)")
+    # axes[-1].set_title("Trajectory (x vs y)")
+    axes[-1].axis('equal')  # keep aspect ratio equal for proper geometry
+    axes[-1].grid(True)
+    axes[-1].legend()
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.show()
+
 def plot_imu_odom_subplots(filename):
     headers, values = FileReader(filename).read_file() 
     time_list = []
@@ -94,4 +132,4 @@ if __name__=="__main__":
 
     filenames=args.files
     for filename in filenames:
-        plot_lidar_scan(filename)
+        plot_trajectory(filename)
