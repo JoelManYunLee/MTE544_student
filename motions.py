@@ -80,10 +80,10 @@ class motion_executioner(Node):
         msg_time = Time.from_msg(imu_msg.header.stamp).nanoseconds
 
         orientation = imu_msg.orientation
-        angular_vel = imu_msg.angular_velocity
+        angular_accel = imu_msg.angular_acceleration
         linear_accel = imu_msg.linear_acceleration
 
-        values = [linear_accel.x, linear_accel.y, angular_vel.z, msg_time] 
+        values = [linear_accel.x, linear_accel.y, angular_accel.z, msg_time] 
 
         self.imu_logger.log_values(values)
         
