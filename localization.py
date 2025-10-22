@@ -48,7 +48,7 @@ class localization(Node):
         
         # Extract quaternion and convert to euler angles
         orientation_q = pose_msg.pose.pose.orientation
-        theta = euler_from_quaternion(orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w)
+        theta = euler_from_quaternion(orientation_q)
         
         # Get timestamp
         stamp = pose_msg.header.stamp

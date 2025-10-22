@@ -6,17 +6,17 @@ from utilities import euler_from_quaternion, calculate_angular_error, calculate_
 
 M_PI=3.1415926535
 
+# Which controller
 P=0; PD=1; PI=2; PID=3
 
 class controller:
-    
     
     # Default gains of the controller for linear and angular motions
     def __init__(self, klp=0.2, klv=0.2, kli=0.2, kap=0.2, kav=0.2, kai=0.2):
         
         # TODO Part 5 and 6: Modify the below lines to test your PD, PI, and PID controller
-        self.PID_linear=PID_ctrl(P, klp, klv, kli, filename_="linear.csv")
-        self.PID_angular=PID_ctrl(P, kap, kav, kai, filename_="angular.csv")
+        self.PID_linear=PID_ctrl(PID, klp, klv, kli, filename_="linear.csv")
+        self.PID_angular=PID_ctrl(PID, kap, kav, kai, filename_="angular.csv")
 
     
     def vel_request(self, pose, goal, status):
@@ -42,7 +42,7 @@ class controller:
 
 class trajectoryController(controller):
 
-    def __init__(self, klp=0.2, klv=0.2, kli=0.2, kap=0.2, kav=0.2, kai=0.2):
+    def __init__(self, klp=0.0, klv=0.0, kli=0.0, kap=0.0, kav=0.0, kai=0.0):
         
         super().__init__(klp, klv, kli, kap, kav, kai)
     
@@ -61,8 +61,8 @@ class trajectoryController(controller):
 
         # TODO Part 5: Add saturation limits for the robot linear and angular velocity (hint: you can use np.clip function)
 
-        linear_vel = ... 
-        angular_vel= ... 
+        linear_vel = np.clip(linear_vel, None, 0.22) 
+        angular_vel= np.clip(angular_vel, None, 2.84) 
         
         return linear_vel, angular_vel
 

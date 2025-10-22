@@ -37,12 +37,11 @@ class decision_maker(Node):
         # TODO Part 5: Tune your parameters here
     
         if motion_type == POINT_PLANNER:
-            self.controller=controller(klp=0.2, klv=0.5, kap=0.8, kav=0.6)
+            self.controller=controller(klp=1.5, klv=0.5, kli=0.8, kap=1.2, kav=0.5, kai=0.8)
             self.planner=planner(POINT_PLANNER)
     
-    
         elif motion_type==TRAJECTORY_PLANNER:
-            self.controller=trajectoryController(klp=0.2, klv=0.5, kap=0.8, kav=0.6)
+            self.controller=trajectoryController(klp=1.5, klv=0.5, kli=0.8, kap=1.2, kav=0.5, kai=0.8)
             self.planner=planner(TRAJECTORY_PLANNER)
 
         else:
@@ -72,13 +71,17 @@ class decision_maker(Node):
         
         # TODO Part 3: Check if you reached the goal
         if type(self.goal) == list:
+            # For Trajectory
             error_angular = calculate_angular_error(self.localizer.pose, self.goal[-1])
             error_linear = calculate_linear_error(self.localizer.pose, self.goal[-1])
-            reached_goal =  (error_linear < 0.1) and (error_angular < 0.1)
-        else: 
+            # only checking linear goal, since xy coord is given and no target angle
+            reached_goal =  (error_linear < 0.01) 
+        else:
+            # For Planner
             error_angular = calculate_angular_error(self.localizer.pose, self.goal)
             error_linear = calculate_linear_error(self.localizer.pose, self.goal)
-            reached_goal =  (error_linear < 0.1) and (error_angular < 0.1)
+            # only checking linear goal, since xy coord is given and no target angle
+            reached_goal =  (error_linear < 0.01) 
 
         if reached_goal:
             print("reached goal")
@@ -116,7 +119,7 @@ def main(args=None):
             publisher_msg=Twist,
             publishing_topic='/cmd_vel',
             qos_publisher=10,  # or use a QoS profile if needed
-            goalPoint=[2.0, 2.0],  # example goal point [x, y]
+            goalPoint=[-1.0, -2.0],  # example goal point [x, y]
             rate=10,
             motion_type=POINT_PLANNER
         )
