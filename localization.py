@@ -7,7 +7,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile
 from nav_msgs.msg import Odometry as odom
 
-from rclpy import init, spin
+import rclpy
 
 rawSensor = 0
 class localization(Node):
@@ -64,12 +64,17 @@ class localization(Node):
 # TODO Part 3
 # Here put a guard that makes the node run, ONLY when run as a main thread!
 # This is to make sure this node functions right before using it in decision.py
-if __name__ == "__main__":
-    init()
+def main(args=None):
+    rclpy.init(args=args)
     localizer = localization(rawSensor)
+    rclpy.spin(localizer)
+
+    localizer.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == "__main__":
     try:
-        spin(localizer)
+        main()
     except KeyboardInterrupt:
         print("Localization node stopped")
-    finally:
-        localizer.destroy_node()
+
