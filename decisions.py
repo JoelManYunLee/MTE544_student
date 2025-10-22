@@ -74,11 +74,11 @@ class decision_maker(Node):
         if type(self.goal) == list:
             error_angular = calculate_angular_error(self.localizer.pose, self.goal[-1])
             error_linear = calculate_linear_error(self.localizer.pose, self.goal[-1])
-            reached_goal =  (error_linear < 0.1) and (error_angular < 0.1)
+            reached_goal =  (abs(error_linear) < 0.1) and (abs(error_angular) < 0.1)
         else: 
             error_angular = calculate_angular_error(self.localizer.pose, self.goal)
             error_linear = calculate_linear_error(self.localizer.pose, self.goal)
-            reached_goal =  (error_linear < 0.1) and (error_angular < 0.1)
+            reached_goal =  (abs(error_linear) < 0.1) and (abs(error_angular) < 0.1)
 
         if reached_goal:
             print("reached goal")
