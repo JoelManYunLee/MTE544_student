@@ -30,8 +30,12 @@ class controller:
         
         # TODO Part 4: Add saturation limits for the robot linear and angular velocity (hint: you can use np.clip function)
 
-        linear_vel = ... 
-        angular_vel= ... 
+        linear_vel = np.clip(linear_vel, None, 0.22) 
+        # real lin vel: 0.31 m/s in safe mdoe, 0.46 m/s without safe mode 
+        # sim lin vel: 0.22 m/s
+        angular_vel= np.clip(angular_vel, None, 2.84) 
+        # real angular_vel: 1.90 rad/s
+        # sim angular_vel: 2.84 rad/s
         
         return linear_vel, angular_vel
     
