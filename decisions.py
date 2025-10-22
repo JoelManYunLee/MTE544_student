@@ -29,7 +29,7 @@ class decision_maker(Node):
         super().__init__("decision_maker")
 
         #TODO Part 4: Create a publisher for the topic responsible for robot's motion
-        self.publisher=... 
+        self.publisher = self.create_publisher(publisher_msg, publishing_topic, qos_publisher)
 
         publishing_period=1/rate
         
@@ -38,7 +38,7 @@ class decision_maker(Node):
     
         if motion_type == POINT_PLANNER:
             self.controller=controller(klp=0.2, klv=0.5, kap=0.8, kav=0.6)
-            self.planner=planner(POINT_PLANNER)    
+            self.planner=planner(POINT_PLANNER)
     
     
         elif motion_type==TRAJECTORY_PLANNER:
@@ -72,10 +72,9 @@ class decision_maker(Node):
         
         # TODO Part 3: Check if you reached the goal
         if type(self.goal) == list:
-            reached_goal=...
+            reached_goal = self.controller.goal_check(self.localizer.getPose(), self.goal)
         else: 
-            reached_goal=...
-        
+            reached_goal = self.controller.goal_check(self.localizer.getPose(), self.goal)        
 
         if reached_goal:
             print("reached goal")
@@ -85,12 +84,14 @@ class decision_maker(Node):
             self.controller.PID_linear.logger.save_log()
             
             #TODO Part 3: exit the spin
-            ... 
+            raise SystemExit
         
         velocity, yaw_rate = self.controller.vel_request(self.localizer.getPose(), self.goal, True)
 
         #TODO Part 4: Publish the velocity to move the robot
-        ... 
+        vel_msg.linear.x = velocity
+        vel_msg.angular.z = yaw_rate
+        self.publisher.publish(vel_msg)
 
 import argparse
 
@@ -107,13 +108,25 @@ def main(args=None):
 
     # TODO Part 4: instantiate the decision_maker with the proper parameters for moving the robot
     if args.motion.lower() == "point":
-        DM=decision_maker(...)
+        DM = decision_maker(
+            publisher_msg=Twist,
+            publishing_topic='/cmd_vel',
+            qos_publisher=10,  # or use a QoS profile if needed
+            goalPoint=[2.0, 2.0],  # example goal point [x, y]
+            rate=10,
+            motion_type=POINT_PLANNER
+        )
     elif args.motion.lower() == "trajectory":
-        DM=decision_maker(...)
+        DM = decision_maker(
+            publisher_msg=Twist,
+            publishing_topic='/cmd_vel',
+            qos_publisher=10,
+            goalPoint=None,  # trajectory planner doesn't use single goal point
+            rate=10,
+            motion_type=TRAJECTORY_PLANNER
+        )
     else:
         print("invalid motion type", file=sys.stderr)        
-    
-    
     
     try:
         spin(DM)
