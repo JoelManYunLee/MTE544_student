@@ -37,7 +37,9 @@ class decision_maker(Node):
         # TODO Part 5: Tune your parameters here
     
         if motion_type == POINT_PLANNER:
-            self.controller=controller(klp=0.8, klv=0.1, kli=0.05, kap=1.0, kav=0.2, kai=0.02)
+            # self.controller=controller(klp=0.8, klv=0.1, kli=0.05, kap=0.3, kav=0.2, kai=0.02) # This is for PID in real
+            self.controller=controller(klp=1, klv=0, kli=0, kap=1, kav=0, kai=0) # This is for PID in SIM
+
             self.planner=planner(POINT_PLANNER)
     
         elif motion_type==TRAJECTORY_PLANNER:
