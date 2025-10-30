@@ -37,11 +37,11 @@ class decision_maker(Node):
         # TODO Part 5: Tune your parameters here
     
         if motion_type == POINT_PLANNER:
-            self.controller=controller(klp=1.5, klv=0.5, kli=0.8, kap=1.2, kav=0.5, kai=0.8)
+            self.controller=controller(klp=0.8, klv=0.1, kli=0.05, kap=1.0, kav=0.2, kai=0.02)
             self.planner=planner(POINT_PLANNER)
     
         elif motion_type==TRAJECTORY_PLANNER:
-            self.controller=trajectoryController(klp=1.5, klv=0.5, kli=0.8, kap=1.2, kav=0.5, kai=0.8)
+            self.controller=trajectoryController(klp=0.2, klv=0.1, kli=0.05, kap=0.5, kav=0.4, kai=0.02)
             self.planner=planner(TRAJECTORY_PLANNER)
 
         else:
@@ -72,10 +72,12 @@ class decision_maker(Node):
         # TODO Part 3: Check if you reached the goal
         if type(self.goal) == list:
             # For Trajectory
-            error_angular = calculate_angular_error(self.localizer.pose, self.goal[-1])
-            error_linear = calculate_linear_error(self.localizer.pose, self.goal[-1])
+            goal = self.goal[-1]
+            print(goal)
+            error_angular = calculate_angular_error(self.localizer.pose, goal)
+            error_linear = calculate_linear_error(self.localizer.pose, goal)
             # only checking linear goal, since xy coord is given and no target angle
-            reached_goal =  (error_linear < 0.01) 
+            reached_goal = (error_linear < 0.01)
         else:
             # For Planner
             error_angular = calculate_angular_error(self.localizer.pose, self.goal)
@@ -119,7 +121,7 @@ def main(args=None):
             publisher_msg=Twist,
             publishing_topic='/cmd_vel',
             qos_publisher=10,  # or use a QoS profile if needed
-            goalPoint=[-1.0, -2.0],  # example goal point [x, y]
+            goalPoint=[1.0, 1.0],  # example goal point [x, y]
             rate=10,
             motion_type=POINT_PLANNER
         )
