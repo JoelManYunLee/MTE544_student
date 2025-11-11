@@ -168,7 +168,18 @@ class mapManipulator(Node):
         return (np.array(np.floor((-origin + pos_array)/res), dtype=np.int32)) - np.array([0, h])
 
     # TODO part 4: See through this method and explain how it works to the TA
+    # Add comments to each line explaining it in detail.
     def make_likelihood_field(self):
+        """
+        This function creates a 2D grid (the likelihood field) that stores
+        the probability of a laser scan point landing in any given cell.
+
+        This probability is calculated based on the cell's distance
+        to the nearest obstacle in the map.
+        
+        The probability P for a cell at a distance from the nearest
+        obstacle is calculated using a Gaussian (Normal) distribution.
+        """
         
         image_array=self.image_array
 

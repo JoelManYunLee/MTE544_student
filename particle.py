@@ -18,12 +18,31 @@ class particle:
         w: angular velocity
         dt: time step
         """
-        self.pose[0] += ...
-        self.pose[1] += ...
-        self.pose[2] += ...
+        
+        delta_theta = w * dt
+        
+        # Calculate the average heading during the time step
+        avg_theta = self.pose[2] + delta_theta / 2
+        
+        # Update x and y using the average heading
+        self.pose[0] += v * dt * np.cos(avg_theta)
+        self.pose[1] += v * dt * np.sin(avg_theta)
+        self.pose[2] += delta_theta
 
     # TODO: You need to explain the following function to TA
+    # TODO: Add comments here explaining the function
     def calculateParticleWeight(self, scanOutput: LaserScan, mapManipulatorInstance: mapManipulator, laser_to_ego_transformation: np.array):
+        '''
+        Calculates the weight of this particle using the likelihood field model.
+        The weight represents the probability P(z|x), where 'z' is the
+        laser scan (scanOutput) and 'x' is the particle's pose (self.pose).
+
+        scanOutput: The sensor_msgs/LaserScan message from the robot.
+        mapManipulatorInstance: contains the pre-computed likelihood field.
+        laser_to_ego_transformation: A 3x3 homogeneous transformation matrix (T_ego_from_laser) 
+                                     that transforms points from the laser's frame to the robot's
+                                     base frame
+        '''
 
         T = np.matmul(self.__poseToTranslationMatrix(), laser_to_ego_transformation)
 
