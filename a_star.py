@@ -47,11 +47,28 @@ def return_path(current_node, maze):
     return path
 
 def euclidian_distance(node1, node2):
+    '''
+    This calcuulates the eulcidean distance which is the more direct path between the start and end node. 
+    hE(n) = sqrt (dx^2 + dy^2)
+    More direct and thus more accurate than manhattan since it takes into account 8 point connectivity (moving on the diagonals)
+    
+    :param node1: Start node
+    :param node2: End node
+    '''
+
     position1 = node1.position
     position2 = node2.position
     return sqrt((position1[0] - position2[0]) ** 2 + (position1[1] - position2[1]) ** 2)
 
 def manhattan_distance(node1, node2):
+    """
+    This calculates the manhattan distance (generally its used for 4 point connectivity since it only takes into account the x and y displacement)
+    Does not account for diagonals
+    hM(n) = dx + dy
+    
+    :param node1: Start Node
+    :param node2: End Node
+    """
     position1 = node1.position
     position2 = node2.position
     return abs(position1[0] - position2[0]) + abs(position1[1] - position2[1])
@@ -88,11 +105,14 @@ def search(maze, start, end,heuristic='e'):
 
     end_node = Node(None, end)
     end_node.g =float('inf');      # set a large value if not defined
-    end_node.h =0    # heuristic estimated cost to end Node
+    end_node.h =0    # heuristic estimated cost to end Node 
     end_node.f = end_node.g + end_node.h
 
     start_node = Node(None, start)
     start_node.g = 0     # cost from start Node
+    ## The heuristic cost is h(ni) => f(ni) = cost(ni) + h(ni) where it makes use of estimates of the remaining cost to the goal node (this is called heuristic cost)
+    ## A* is generally more efficient than Dijkstra but its efficiency depends on the choice of the heuristic cost (NOT DEFINITIVE)
+    ## A* is guaranteed optimal if heuristic cost is an under estimate of the cost to go. (note h = 0 makes it Dijkstra)
     start_node.h = heuristic_function(start_node,end_node)   # heuristic estimated cost to end Node
     start_node.f = start_node.g+start_node.h
 
